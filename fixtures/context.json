@@ -1,0 +1,42 @@
+{
+  "domain": "student-award-review",
+  "version": 1,
+  "sample_id": "public-sample-020",
+  "actors": [
+    "候选人与提名人",
+    "资料核验人员",
+    "评委",
+    "申诉与结果发布人员"
+  ],
+  "facts": [
+    "选举关注学业成绩、领导才能和社会服务",
+    "获奖者来自不同大专院校和经历领域",
+    "青年发展计划强调拓宽视野与参与社会建设"
+  ],
+  "constraints": [
+    "候选材料验真",
+    "评委回避分配",
+    "多阶段评分",
+    "申诉与结果发布"
+  ],
+  "records": [
+    {
+      "id": "student-award-review-source",
+      "kind": "source",
+      "label": "选举关注学业成绩、领导才能和社会服务",
+      "status": "active"
+    },
+    {
+      "id": "student-award-review-review",
+      "kind": "review",
+      "label": "候选材料验真",
+      "status": "pending"
+    },
+    {
+      "id": "student-award-review-history",
+      "kind": "history",
+      "label": "青年发展计划强调拓宽视野与参与社会建设",
+      "status": "historical"
+    }
+  ]
+}
