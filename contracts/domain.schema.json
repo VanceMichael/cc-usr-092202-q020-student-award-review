@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "杰出学生评审证据室领域资料",
+  "$id": "https://example.org/schemas/student-award-review.json",
+  "title": "傑出學生評審證據室領域資料",
   "type": "object",
   "required": [
     "domain",
@@ -9,78 +10,484 @@
     "actors",
     "facts",
     "constraints",
+    "settings",
+    "institutions",
+    "candidates",
+    "materials",
+    "verifications",
+    "confirmed_facts",
+    "judges",
+    "coi_declarations",
+    "stages",
+    "anonymous_map",
+    "stage_evidence",
+    "score_sheets",
+    "score_reviews",
+    "appeals",
+    "stage_results",
+    "results",
+    "reconstruction",
+    "retention_schedule",
     "records"
   ],
   "properties": {
-    "domain": {
-      "type": "string",
-      "const": "student-award-review"
+    "domain": {"const": "student-award-review", "type": "string"},
+    "version": {"type": "integer", "minimum": 1},
+    "sample_id": {"type": "string", "minLength": 1},
+    "actors": {"type": "array", "minItems": 2, "items": {"type": "string", "minLength": 1}},
+    "facts": {"type": "array", "minItems": 2, "items": {"type": "string", "minLength": 1}},
+    "constraints": {"type": "array", "minItems": 2, "items": {"type": "string", "minLength": 1}},
+
+    "settings": {
+      "type": "object",
+      "required": [
+        "edition", "assignment_deadline", "score_scale", "min_panel_size",
+        "extreme_gap_threshold", "review_policy", "stage_composition",
+        "screening_pass", "appeal_freeze_window", "publication_at", "retention"
+      ],
+      "properties": {
+        "edition": {"type": "string", "minLength": 1},
+        "assignment_deadline": {"type": "string", "format": "date-time"},
+        "score_scale": {
+          "type": "object", "required": ["min", "max"],
+          "properties": {"min": {"type": "number"}, "max": {"type": "number"}},
+          "additionalProperties": false
+        },
+        "min_panel_size": {"type": "integer", "minimum": 1},
+        "extreme_gap_threshold": {"type": "number", "exclusiveMinimum": 0},
+        "review_policy": {
+          "type": "string",
+          "const": "extreme_gap_triggers_review_only_no_automatic_elimination"
+        },
+        "stage_composition": {"$ref": "#/$defs/weightsByStage"},
+        "screening_pass": {
+          "type": "object", "required": ["min_total"],
+          "properties": {"min_total": {"type": "number"}},
+          "additionalProperties": false
+        },
+        "appeal_freeze_window": {
+          "type": "object", "required": ["starts_at", "ends_at"],
+          "properties": {
+            "starts_at": {"type": "string", "format": "date-time"},
+            "ends_at": {"type": "string", "format": "date-time"}
+          },
+          "additionalProperties": false
+        },
+        "publication_at": {"type": "string", "format": "date-time"},
+        "retention": {
+          "type": "object",
+          "required": ["unsuccessful_months", "awardee_archive_years", "withdrawn_audit_years"],
+          "properties": {
+            "unsuccessful_months": {"type": "integer", "minimum": 1},
+            "awardee_archive_years": {"type": "integer", "minimum": 1},
+            "withdrawn_audit_years": {"type": "integer", "minimum": 1}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
     },
-    "version": {
-      "type": "integer",
-      "minimum": 1
-    },
-    "sample_id": {
-      "type": "string",
-      "minLength": 1
-    },
-    "actors": {
-      "type": "array",
-      "minItems": 2,
+
+    "institutions": {
+      "type": "array", "minItems": 1,
       "items": {
-        "type": "string"
+        "type": "object", "required": ["id", "name"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "name": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
       }
     },
-    "facts": {
-      "type": "array",
-      "minItems": 2,
+
+    "candidates": {
+      "type": "array", "minItems": 2,
       "items": {
-        "type": "string"
+        "type": "object", "required": ["id", "name", "institution_id", "is_minor"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "name": {"type": "string", "minLength": 1},
+          "institution_id": {"type": "string", "minLength": 1},
+          "is_minor": {"type": "boolean"},
+          "guardian_consent": {
+            "type": "object",
+            "required": ["consent_id", "granted_at", "scopes", "limits"],
+            "properties": {
+              "consent_id": {"type": "string", "minLength": 1},
+              "granted_at": {"type": "string", "format": "date-time"},
+              "scopes": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+              "limits": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
       }
     },
-    "constraints": {
-      "type": "array",
-      "minItems": 2,
+
+    "materials": {
+      "type": "array", "minItems": 2,
       "items": {
-        "type": "string"
+        "type": "object", "required": ["id", "candidate_id", "kind", "access_scopes", "sensitive", "versions"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "candidate_id": {"type": "string", "minLength": 1},
+          "kind": {"$ref": "#/$defs/materialKind"},
+          "access_scopes": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "sensitive": {"type": "boolean"},
+          "versions": {
+            "type": "array", "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["version_no", "action", "submitted_at", "status", "summary"],
+              "properties": {
+                "version_no": {"type": "integer", "minimum": 1},
+                "action": {"enum": ["initial", "resubmit", "correction", "withdrawal"]},
+                "submitted_at": {"type": "string", "format": "date-time"},
+                "status": {"enum": ["active", "superseded", "withdrawn"]},
+                "summary": {"type": "string", "minLength": 1}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
       }
     },
-    "records": {
+
+    "verifications": {
       "type": "array",
-      "minItems": 2,
       "items": {
         "type": "object",
-        "required": [
-          "id",
-          "kind",
-          "label",
-          "status"
-        ],
+        "required": ["id", "material_id", "version_no", "verifier_kind", "verifier_name", "requested_at", "responded_at", "status"],
         "properties": {
-          "id": {
-            "type": "string",
-            "minLength": 1
+          "id": {"type": "string", "minLength": 1},
+          "material_id": {"type": "string", "minLength": 1},
+          "version_no": {"type": "integer", "minimum": 1},
+          "verifier_kind": {
+            "enum": ["institution", "club", "ngo", "nominator", "public_registry", "secretariat"]
           },
-          "kind": {
-            "type": "string",
-            "minLength": 1
-          },
-          "label": {
-            "type": "string",
-            "minLength": 1
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "active",
-              "pending",
-              "historical"
-            ]
+          "verifier_name": {"type": "string", "minLength": 1},
+          "requested_at": {"type": "string", "format": "date-time"},
+          "responded_at": {"type": "string", "format": "date-time"},
+          "status": {"enum": ["confirmed", "discrepant", "unverified"]},
+          "note": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "confirmed_facts": {
+      "type": "array", "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["id", "candidate_id", "material_id", "version_no", "confirmed_at", "sensitive", "redacted", "visible_in_stages", "publication_mode", "summary"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "candidate_id": {"type": "string", "minLength": 1},
+          "material_id": {"type": "string", "minLength": 1},
+          "version_no": {"type": "integer", "minimum": 1},
+          "confirmed_at": {"type": "string", "format": "date-time"},
+          "sensitive": {"type": "boolean"},
+          "redacted": {"type": "boolean"},
+          "visible_in_stages": {"type": "array", "items": {"$ref": "#/$defs/stageId"}, "minItems": 1},
+          "publication_mode": {"enum": ["full", "redacted", "none"]},
+          "summary": {"type": "string", "minLength": 1},
+          "derived_from_fact": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "judges": {
+      "type": "array", "minItems": 2,
+      "items": {
+        "type": "object", "required": ["id", "name", "affiliation"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "name": {"type": "string", "minLength": 1},
+          "affiliation": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "coi_declarations": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["id", "judge_id", "candidate_id", "relation", "declared_at"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "judge_id": {"type": "string", "minLength": 1},
+          "candidate_id": {"type": "string", "minLength": 1},
+          "relation": {"type": "string", "minLength": 1},
+          "declared_at": {"type": "string", "format": "date-time"}
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "stages": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "label", "window_starts_at", "locked_at", "rubric_frozen_at", "rubric", "candidate_ids", "advanced_candidate_ids"],
+        "properties": {
+          "id": {"$ref": "#/$defs/stageId"},
+          "kind": {"enum": ["screening_anonymous", "interview", "final"]},
+          "label": {"type": "string", "minLength": 1},
+          "window_starts_at": {"type": "string", "format": "date-time"},
+          "locked_at": {"type": "string", "format": "date-time"},
+          "rubric_frozen_at": {"type": "string", "format": "date-time"},
+          "rubric": {"$ref": "#/$defs/rubric"},
+          "candidate_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "advanced_candidate_ids": {"type": "array", "items": {"type": "string", "minLength": 1}}
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "anonymous_map": {
+      "type": "object",
+      "required": ["sealed_by", "sealed_at", "opened_at", "entries"],
+      "properties": {
+        "sealed_by": {"type": "string", "minLength": 1},
+        "sealed_at": {"type": "string", "format": "date-time"},
+        "opened_at": {"type": "string", "format": "date-time"},
+        "entries": {
+          "type": "array", "minItems": 2,
+          "items": {
+            "type": "object", "required": ["packet_code", "candidate_id"],
+            "properties": {
+              "packet_code": {"type": "string", "minLength": 1},
+              "candidate_id": {"type": "string", "minLength": 1}
+            },
+            "additionalProperties": false
           }
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "stage_evidence": {
+      "type": "array", "minItems": 2,
+      "items": {
+        "type": "object", "required": ["stage_id", "candidate_id", "fact_ids"],
+        "properties": {
+          "stage_id": {"$ref": "#/$defs/stageId"},
+          "candidate_id": {"type": "string", "minLength": 1},
+          "fact_ids": {"type": "array", "items": {"type": "string", "minLength": 1}}
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "score_sheets": {
+      "type": "array", "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["id", "stage_id", "judge_id", "recorded_at", "scores"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "stage_id": {"$ref": "#/$defs/stageId"},
+          "judge_id": {"type": "string", "minLength": 1},
+          "candidate_id": {"type": ["string", "null"], "minLength": 1},
+          "packet_code": {"type": ["string", "null"], "minLength": 1},
+          "recorded_at": {"type": "string", "format": "date-time"},
+          "scores": {
+            "type": "object", "required": ["academic", "leadership", "service"],
+            "properties": {
+              "academic": {"type": "number", "minimum": 0},
+              "leadership": {"type": "number", "minimum": 0},
+              "service": {"type": "number", "minimum": 0}
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "score_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "stage_id", "candidate_id", "dimension", "gap", "triggered_at", "reviewer_group", "outcome", "elimination_effect", "note"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "stage_id": {"$ref": "#/$defs/stageId"},
+          "candidate_id": {"type": "string", "minLength": 1},
+          "dimension": {"enum": ["academic", "leadership", "service"]},
+          "gap": {"type": "number", "exclusiveMinimum": 0},
+          "triggered_at": {"type": "string", "format": "date-time"},
+          "resolved_at": {"type": "string", "format": "date-time"},
+          "reviewer_group": {"type": "string", "minLength": 1},
+          "outcome": {"enum": ["upheld", "adjusted"]},
+          "elimination_effect": {"const": "none"},
+          "note": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "appeals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "candidate_id", "filed_at", "status", "grounds", "outcome", "ranking_changed", "note"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "candidate_id": {"type": "string", "minLength": 1},
+          "filed_at": {"type": "string", "format": "date-time"},
+          "status": {"enum": ["resolved", "withdrawn_by_applicant"]},
+          "grounds": {"type": "string", "minLength": 1},
+          "outcome": {"enum": ["dismissed", "upheld", "withdrawn"]},
+          "resolved_at": {"type": "string", "format": "date-time"},
+          "ranking_changed": {"const": false},
+          "note": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "stage_results": {
+      "type": "array", "minItems": 3,
+      "items": {
+        "type": "object", "required": ["stage_id", "candidate_id", "total"],
+        "properties": {
+          "stage_id": {"$ref": "#/$defs/stageId"},
+          "candidate_id": {"type": "string", "minLength": 1},
+          "total": {"type": "number", "minimum": 0}
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "results": {
+      "type": "object",
+      "required": ["snapshot_id", "published_at", "entries"],
+      "properties": {
+        "snapshot_id": {"type": "string", "minLength": 1},
+        "published_at": {"type": "string", "format": "date-time"},
+        "entries": {
+          "type": "array", "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["rank", "candidate_id", "award", "composite", "reason_fact_ids", "publication_name_allowed"],
+            "properties": {
+              "rank": {"type": "integer", "minimum": 1},
+              "candidate_id": {"type": "string", "minLength": 1},
+              "award": {"enum": ["champion", "first_runner_up", "second_runner_up", "merit", "none"]},
+              "composite": {"type": "number", "minimum": 0},
+              "reason_fact_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+              "publication_name_allowed": {"type": "boolean"}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "reconstruction": {
+      "type": "object",
+      "required": ["id", "formula", "rounding_decimals", "anonymous_map_opened_at", "stage_snapshots", "appeal_ids_resolved"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "formula": {"$ref": "#/$defs/weightsByStage"},
+        "rounding_decimals": {"type": "integer", "minimum": 0},
+        "anonymous_map_opened_at": {"type": "string", "format": "date-time"},
+        "stage_snapshots": {
+          "type": "array", "minItems": 3, "maxItems": 3,
+          "items": {
+            "type": "object",
+            "required": ["stage_id", "locked_at", "rubric", "panel_judges", "score_sheet_ids"],
+            "properties": {
+              "stage_id": {"$ref": "#/$defs/stageId"},
+              "locked_at": {"type": "string", "format": "date-time"},
+              "rubric": {"$ref": "#/$defs/rubric"},
+              "panel_judges": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+              "score_sheet_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+            },
+            "additionalProperties": false
+          }
+        },
+        "appeal_ids_resolved": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "additionalProperties": false
+    },
+
+    "retention_schedule": {
+      "type": "array", "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["id", "candidate_id", "class", "retain_until", "method"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "candidate_id": {"type": "string", "minLength": 1},
+          "material_id": {"type": "string", "minLength": 1},
+          "class": {"enum": ["awardee_archive", "unsuccessful_disposal", "withdrawn_audit"]},
+          "retain_until": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+          "method": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "records": {
+      "type": "array", "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "label", "status"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "kind": {"type": "string", "minLength": 1},
+          "label": {"type": "string", "minLength": 1},
+          "status": {"enum": ["active", "pending", "historical"]}
         },
         "additionalProperties": false
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$defs": {
+    "stageId": {"enum": ["S1", "S2", "S3"]},
+    "materialKind": {
+      "enum": ["nomination", "transcript", "project_role", "service_hours", "recommendation", "public_work"]
+    },
+    "weightsByStage": {
+      "type": "object",
+      "required": ["S1", "S2", "S3"],
+      "properties": {
+        "S1": {"type": "number", "minimum": 0, "maximum": 1},
+        "S2": {"type": "number", "minimum": 0, "maximum": 1},
+        "S3": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": false
+    },
+    "rubric": {
+      "type": "object", "required": ["labels", "weights"],
+      "properties": {
+        "labels": {
+          "type": "object", "required": ["academic", "leadership", "service"],
+          "properties": {
+            "academic": {"type": "string", "minLength": 1},
+            "leadership": {"type": "string", "minLength": 1},
+            "service": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
+        },
+        "weights": {
+          "type": "object", "required": ["academic", "leadership", "service"],
+          "properties": {
+            "academic": {"type": "number", "minimum": 0, "maximum": 1},
+            "leadership": {"type": "number", "minimum": 0, "maximum": 1},
+            "service": {"type": "number", "minimum": 0, "maximum": 1}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
 }
