@@ -1,42 +1,297 @@
 {
   "domain": "student-award-review",
-  "version": 1,
-  "sample_id": "public-sample-020",
+  "version": 2,
+  "sample_id": "public-sample-026",
+  "generated_at": "2026-06-20",
   "actors": [
-    "候选人与提名人",
-    "资料核验人员",
-    "评委",
-    "申诉与结果发布人员"
+    "候选人与提名人（未成年人含监护人联签）",
+    "资料核验人员（院校注册组、社团、公益机构、作品链接核验）",
+    "评委（按利益冲突回避分配）",
+    "申诉秘书处与结果发布人员"
   ],
   "facts": [
-    "选举关注学业成绩、领导才能和社会服务",
-    "获奖者来自不同大专院校和经历领域",
-    "青年发展计划强调拓宽视野与参与社会建设"
+    "选举同时考察学业成绩、领导才能和社会服务，候选人经历分散在院校、社团与公益机构",
+    "提名授权、成绩证明、项目角色、服务时数、推荐意见和公开作品六类材料分别验真",
+    "材料的补交、撤回或更正均产生新版本，旧版本保留为审计证据，不得删除或覆盖",
+    "匿名初审、面谈、终审使用各自冻结的评分标准，冻结后不得修改",
+    "评委评分前须申报利益冲突并按候选人回避；极端分差只触发复核，不能直接淘汰候选人",
+    "申诉受理时冻结当时的证据版本、评分标准与有效评委名单",
+    "获奖理由只能引用状态为 confirmed 的材料版本；未成年人及敏感经历按授权范围展示",
+    "任何最终名次都可重建当时的证据（含旧版本）、评分规则与有效评委",
+    "未入选者资料按约定期限清理，仅保留去标识统计"
   ],
   "constraints": [
-    "候选材料验真",
-    "评委回避分配",
-    "多阶段评分",
-    "申诉与结果发布"
+    "六类材料分渠道外部验真",
+    "材料版本链完整：supersedes 与 successor 双向一致，旧版本仅 audit 可见",
+    "回避一致：评委冲突申报、recused 名单、各阶段面板与评分记录一致",
+    "评分只能在阶段标准 frozen_at 之后由该候选人该阶段面板内的评委提交",
+    "分数与同组中位数差距超过阈值必须有复核记录，复核结论不得为淘汰",
+    "申诉冻结快照引用的材料版本、分数与评委必须与当时一致",
+    "公开发布的获奖理由只能引用 confirmed 且授权 published 的材料",
+    "每个最终名次必须有可重建包；未入选者必须有到期清理安排",
+    "未成年人提名须监护人联签；sensitive 材料未经授权不得 published"
   ],
-  "records": [
+  "constants": {
+    "extreme_score_gap_threshold": 20,
+    "unsuccessful_retention_days_after_announcement": 183
+  },
+  "candidates": [
     {
-      "id": "student-award-review-source",
-      "kind": "source",
-      "label": "选举关注学业成绩、领导才能和社会服务",
-      "status": "active"
+      "id": "cand-01",
+      "alias": "候选人甲（化名）",
+      "institution": "海北学院（样例）",
+      "minor": false,
+      "sensitive_experience": false,
+      "consent": {
+        "nomination_material_id": "m-nom-01-v2",
+        "guardian_countersign": null,
+        "granted_at": "2026-03-05",
+        "scopes": ["screen", "interview", "final", "published"],
+        "public_release": "full"
+      }
     },
     {
-      "id": "student-award-review-review",
-      "kind": "review",
-      "label": "候选材料验真",
-      "status": "pending"
+      "id": "cand-02",
+      "alias": "候选人乙（化名）",
+      "institution": "西山书院（样例）",
+      "minor": true,
+      "age": 17,
+      "sensitive_experience": false,
+      "consent": {
+        "nomination_material_id": "m-nom-02-v1",
+        "guardian_countersign": "m-nom-02-v1",
+        "granted_at": "2026-03-02",
+        "scopes": ["screen", "interview", "final"],
+        "public_release": "award_only"
+      }
     },
     {
-      "id": "student-award-review-history",
-      "kind": "history",
-      "label": "青年发展计划强调拓宽视野与参与社会建设",
-      "status": "historical"
+      "id": "cand-03",
+      "alias": "候选人丙（化名）",
+      "institution": "东湾理工学院（样例）",
+      "minor": false,
+      "sensitive_experience": true,
+      "consent": {
+        "nomination_material_id": "m-nom-03-v1",
+        "guardian_countersign": null,
+        "granted_at": "2026-03-03",
+        "scopes": ["screen", "interview", "final"],
+        "public_release": "none"
+      }
     }
-  ]
+  ],
+  "materials": [
+    {"id": "m-nom-01-v1", "candidate_id": "cand-01", "type": "nomination", "version": 1, "status": "superseded", "submitted_at": "2026-03-01", "supersedes": null, "successor": "m-nom-01-v2", "note": "初版授权范围未含公开作品发布", "verification": {"channel": "nomination_authority", "status": "confirmed", "verified_at": "2026-03-04", "ref": "NO-01-V1"}, "visibility": ["audit"]},
+    {"id": "m-nom-01-v2", "candidate_id": "cand-01", "type": "nomination", "version": 2, "status": "confirmed", "submitted_at": "2026-03-05", "supersedes": "m-nom-01-v1", "successor": null, "note": "更正授权范围，补交公开作品发布授权", "verification": {"channel": "nomination_authority", "status": "confirmed", "verified_at": "2026-03-06", "ref": "NO-01-V2"}, "visibility": ["screen", "interview", "final", "published"]},
+    {"id": "m-tra-01-v1", "candidate_id": "cand-01", "type": "transcript", "version": 1, "status": "confirmed", "submitted_at": "2026-03-08", "supersedes": null, "successor": null, "verification": {"channel": "registrar", "status": "confirmed", "verified_at": "2026-03-15", "ref": "REG-01-7781"}, "visibility": ["screen", "interview", "final", "published"]},
+    {"id": "m-pro-01-v1", "candidate_id": "cand-01", "type": "project_role", "version": 1, "status": "confirmed", "submitted_at": "2026-03-08", "supersedes": null, "successor": null, "verification": {"channel": "club", "status": "confirmed", "verified_at": "2026-03-16", "ref": "CLUB-01-33", "detail": "学生会会长（2025/26）"}, "visibility": ["screen", "interview", "final", "published"]},
+    {"id": "m-svc-01-v1", "candidate_id": "cand-01", "type": "service_hours", "version": 1, "status": "confirmed", "submitted_at": "2026-03-08", "supersedes": null, "successor": null, "verification": {"channel": "ngo", "status": "confirmed", "verified_at": "2026-03-17", "ref": "NGO-01-204", "detail": "142 小时，社区课辅计划"}, "visibility": ["screen", "interview", "final", "published"]},
+    {"id": "m-rec-01-v1", "candidate_id": "cand-01", "type": "recommendation", "version": 1, "status": "withdrawn", "submitted_at": "2026-03-08", "supersedes": null, "successor": "m-rec-01-v2", "note": "原推荐人于 2026-03-22 撤回推荐，旧意见保留留痕但不展示给评委", "verification": {"channel": "recommender", "status": "withdrawn", "verified_at": "2026-03-22", "ref": "REC-01-A"}, "visibility": ["audit"]},
+    {"id": "m-rec-01-v2", "candidate_id": "cand-01", "type": "recommendation", "version": 2, "status": "confirmed", "submitted_at": "2026-03-23", "supersedes": "m-rec-01-v1", "successor": null, "note": "更换推荐人后补交", "verification": {"channel": "recommender", "status": "confirmed", "verified_at": "2026-03-28", "ref": "REC-01-B"}, "visibility": ["screen", "interview", "final", "published"]},
+    {"id": "m-pub-01-v1", "candidate_id": "cand-01", "type": "public_work", "version": 1, "status": "confirmed", "submitted_at": "2026-03-08", "supersedes": null, "successor": null, "verification": {"channel": "public_link", "status": "confirmed", "verified_at": "2026-03-19", "ref": "https://example.invalid/works/01", "detail": "链接存档快照一致"}, "visibility": ["screen", "interview", "final", "published"]},
+
+    {"id": "m-nom-02-v1", "candidate_id": "cand-02", "type": "nomination", "version": 1, "status": "confirmed", "submitted_at": "2026-03-02", "supersedes": null, "successor": null, "guardian_countersign": true, "verification": {"channel": "nomination_authority", "status": "confirmed", "verified_at": "2026-03-10", "ref": "NO-02"}, "visibility": ["screen", "interview", "final"]},
+    {"id": "m-tra-02-v1", "candidate_id": "cand-02", "type": "transcript", "version": 1, "status": "superseded", "submitted_at": "2026-03-09", "supersedes": null, "successor": "m-tra-02-v2", "note": "成绩证明缺页，补交前不得进入核验通过集", "verification": {"channel": "registrar", "status": "disputed", "verified_at": "2026-03-12", "ref": "REG-02-1190"}, "visibility": ["audit"]},
+    {"id": "m-tra-02-v2", "candidate_id": "cand-02", "type": "transcript", "version": 2, "status": "confirmed", "submitted_at": "2026-03-18", "supersedes": "m-tra-02-v1", "successor": null, "note": "补交完整成绩证明", "verification": {"channel": "registrar", "status": "confirmed", "verified_at": "2026-03-22", "ref": "REG-02-1190-R"}, "visibility": ["screen", "interview", "final"]},
+    {"id": "m-pro-02-v1", "candidate_id": "cand-02", "type": "project_role", "version": 1, "status": "confirmed", "submitted_at": "2026-03-09", "supersedes": null, "successor": null, "verification": {"channel": "club", "status": "confirmed", "verified_at": "2026-03-20", "ref": "CLUB-02-17", "detail": "外展服务组组长"}, "visibility": ["screen", "interview", "final"]},
+    {"id": "m-svc-02-v1", "candidate_id": "cand-02", "type": "service_hours", "version": 1, "status": "confirmed", "submitted_at": "2026-03-09", "supersedes": null, "successor": null, "verification": {"channel": "ngo", "status": "confirmed", "verified_at": "2026-03-21", "ref": "NGO-02-518", "detail": "88 小时，儿童伴读（经历细节按未成年人授权脱敏）"}, "visibility": ["screen", "interview", "final"]},
+    {"id": "m-rec-02-v1", "candidate_id": "cand-02", "type": "recommendation", "version": 1, "status": "confirmed", "submitted_at": "2026-03-09", "supersedes": null, "successor": null, "verification": {"channel": "recommender", "status": "confirmed", "verified_at": "2026-03-23", "ref": "REC-02"}, "visibility": ["screen", "interview", "final"]},
+    {"id": "m-pub-02-v1", "candidate_id": "cand-02", "type": "public_work", "version": 1, "status": "unavailable", "submitted_at": "2026-03-09", "supersedes": null, "successor": null, "note": "公开链接核验时已失效，候选人不再补交；不得作为确认事实引用", "verification": {"channel": "public_link", "status": "unavailable", "verified_at": "2026-03-20", "ref": "https://example.invalid/works/02-gone"}, "visibility": ["audit"]},
+
+    {"id": "m-nom-03-v1", "candidate_id": "cand-03", "type": "nomination", "version": 1, "status": "confirmed", "submitted_at": "2026-03-03", "supersedes": null, "successor": null, "verification": {"channel": "nomination_authority", "status": "confirmed", "verified_at": "2026-03-11", "ref": "NO-03"}, "visibility": ["screen", "interview", "final"]},
+    {"id": "m-tra-03-v1", "candidate_id": "cand-03", "type": "transcript", "version": 1, "status": "confirmed", "submitted_at": "2026-03-10", "supersedes": null, "successor": null, "verification": {"channel": "registrar", "status": "confirmed", "verified_at": "2026-03-16", "ref": "REG-03-4455"}, "visibility": ["screen", "interview", "final"]},
+    {"id": "m-pro-03-v1", "candidate_id": "cand-03", "type": "project_role", "version": 1, "status": "superseded", "submitted_at": "2026-03-10", "supersedes": null, "successor": "m-pro-03-v2", "note": "自报“项目统筹”，机构回函为“组员”，旧版包装说法留痕", "verification": {"channel": "ngo", "status": "disputed", "verified_at": "2026-03-18", "ref": "NGO-03-ROLE-A"}, "visibility": ["audit"]},
+    {"id": "m-pro-03-v2", "candidate_id": "cand-03", "type": "project_role", "version": 2, "status": "confirmed", "submitted_at": "2026-03-20", "supersedes": "m-pro-03-v1", "successor": null, "note": "按机构核验更正为组员", "verification": {"channel": "ngo", "status": "confirmed", "verified_at": "2026-03-20", "ref": "NGO-03-ROLE-B"}, "visibility": ["screen", "interview", "final"]},
+    {"id": "m-svc-03-v1", "candidate_id": "cand-03", "type": "service_hours", "version": 1, "status": "superseded", "submitted_at": "2026-03-10", "supersedes": null, "successor": "m-svc-03-v2", "note": "自报 230 小时，机构核证 156 小时，旧版留痕", "verification": {"channel": "ngo", "status": "disputed", "verified_at": "2026-03-19", "ref": "NGO-03-HRS-A"}, "visibility": ["audit"]},
+    {"id": "m-svc-03-v2", "candidate_id": "cand-03", "type": "service_hours", "version": 2, "status": "confirmed", "submitted_at": "2026-03-20", "supersedes": "m-svc-03-v1", "successor": null, "verification": {"channel": "ngo", "status": "confirmed", "verified_at": "2026-03-20", "ref": "NGO-03-HRS-B", "detail": "156 小时，露宿者外展（服务对象资料属敏感经历，全程脱敏）"}, "visibility": ["screen", "interview", "final"], "sensitive": true},
+    {"id": "m-rec-03-v1", "candidate_id": "cand-03", "type": "recommendation", "version": 1, "status": "confirmed", "submitted_at": "2026-03-10", "supersedes": null, "successor": null, "verification": {"channel": "recommender", "status": "confirmed", "verified_at": "2026-03-24", "ref": "REC-03"}, "visibility": ["screen", "interview", "final"]},
+    {"id": "m-pub-03-v1", "candidate_id": "cand-03", "type": "public_work", "version": 1, "status": "confirmed", "submitted_at": "2026-03-10", "supersedes": null, "successor": null, "note": "作品含服务对象影像，按授权仅终审阶段线下调阅，不得公开发布", "verification": {"channel": "public_link", "status": "confirmed", "verified_at": "2026-03-19", "ref": "https://example.invalid/works/03-restricted"}, "visibility": ["final"], "sensitive": true}
+  ],
+  "judges": [
+    {"id": "judge-01", "alias": "评委甲（化名）", "declared_at": "2026-03-27", "conflicts": [{"candidate_id": "cand-01", "reason": "任候选人甲所在社团大会顾问"}], "recused": ["cand-01"]},
+    {"id": "judge-02", "alias": "评委乙（化名）", "declared_at": "2026-03-27", "conflicts": [{"candidate_id": "cand-02", "reason": "在候选人乙就读院校兼任课程导师"}], "recused": ["cand-02"]},
+    {"id": "judge-03", "alias": "评委丙（化名）", "declared_at": "2026-03-27", "conflicts": [{"candidate_id": "cand-03", "reason": "曾指导候选人丙的服务项目申报"}], "recused": ["cand-03"]},
+    {"id": "judge-04", "alias": "评委丁（化名）", "declared_at": "2026-03-27", "conflicts": [], "recused": []}
+  ],
+  "stages": [
+    {
+      "id": "screen",
+      "name": "匿名初审",
+      "anonymized": true,
+      "blinded_fields": ["name", "institution", "gender", "age", "guardian_info"],
+      "criteria": {"version": "cv-screen-1", "frozen_at": "2026-04-01", "weights": {"academic": 0.4, "leadership": 0.3, "service": 0.3}, "scale": [0, 100]},
+      "panels": [
+        {"candidate_id": "cand-01", "judge_ids": ["judge-02", "judge-03", "judge-04"]},
+        {"candidate_id": "cand-02", "judge_ids": ["judge-01", "judge-03", "judge-04"]},
+        {"candidate_id": "cand-03", "judge_ids": ["judge-01", "judge-02", "judge-04"]}
+      ]
+    },
+    {
+      "id": "interview",
+      "name": "面谈",
+      "anonymized": false,
+      "blinded_fields": [],
+      "criteria": {"version": "cv-interview-1", "frozen_at": "2026-05-06", "weights": {"academic": 0.3, "leadership": 0.35, "service": 0.35}, "scale": [0, 100]},
+      "panels": [
+        {"candidate_id": "cand-01", "judge_ids": ["judge-02", "judge-03", "judge-04"]},
+        {"candidate_id": "cand-02", "judge_ids": ["judge-01", "judge-03", "judge-04"]},
+        {"candidate_id": "cand-03", "judge_ids": ["judge-01", "judge-02", "judge-04"]}
+      ]
+    },
+    {
+      "id": "final",
+      "name": "终审",
+      "anonymized": false,
+      "blinded_fields": [],
+      "criteria": {"version": "cv-final-1", "frozen_at": "2026-06-01", "weights": {"academic": 0.3, "leadership": 0.35, "service": 0.35}, "scale": [0, 100]},
+      "panels": [
+        {"candidate_id": "cand-01", "judge_ids": ["judge-02", "judge-03", "judge-04"]},
+        {"candidate_id": "cand-02", "judge_ids": ["judge-01", "judge-03", "judge-04"]},
+        {"candidate_id": "cand-03", "judge_ids": ["judge-01", "judge-02", "judge-04"]}
+      ]
+    }
+  ],
+  "scores": [
+    {"id": "sc-01-s-j2", "stage_id": "screen", "candidate_id": "cand-01", "judge_id": "judge-02", "criteria_version": "cv-screen-1", "score": 86, "scored_at": "2026-04-10"},
+    {"id": "sc-01-s-j3", "stage_id": "screen", "candidate_id": "cand-01", "judge_id": "judge-03", "criteria_version": "cv-screen-1", "score": 84, "scored_at": "2026-04-10"},
+    {"id": "sc-01-s-j4", "stage_id": "screen", "candidate_id": "cand-01", "judge_id": "judge-04", "criteria_version": "cv-screen-1", "score": 90, "scored_at": "2026-04-10"},
+    {"id": "sc-02-s-j1", "stage_id": "screen", "candidate_id": "cand-02", "judge_id": "judge-01", "criteria_version": "cv-screen-1", "score": 82, "scored_at": "2026-04-10"},
+    {"id": "sc-02-s-j3", "stage_id": "screen", "candidate_id": "cand-02", "judge_id": "judge-03", "criteria_version": "cv-screen-1", "score": 79, "scored_at": "2026-04-10"},
+    {"id": "sc-02-s-j4", "stage_id": "screen", "candidate_id": "cand-02", "judge_id": "judge-04", "criteria_version": "cv-screen-1", "score": 80, "scored_at": "2026-04-10"},
+    {"id": "sc-03-s-j1", "stage_id": "screen", "candidate_id": "cand-03", "judge_id": "judge-01", "criteria_version": "cv-screen-1", "score": 88, "scored_at": "2026-04-10"},
+    {"id": "sc-03-s-j2", "stage_id": "screen", "candidate_id": "cand-03", "judge_id": "judge-02", "criteria_version": "cv-screen-1", "score": 85, "scored_at": "2026-04-10"},
+    {"id": "sc-03-s-j4", "stage_id": "screen", "candidate_id": "cand-03", "judge_id": "judge-04", "criteria_version": "cv-screen-1", "score": 62, "scored_at": "2026-04-10", "_note": "与组内中位数差距 23，触发极端分差复核"},
+
+    {"id": "sc-01-i-j2", "stage_id": "interview", "candidate_id": "cand-01", "judge_id": "judge-02", "criteria_version": "cv-interview-1", "score": 88, "scored_at": "2026-05-16"},
+    {"id": "sc-01-i-j3", "stage_id": "interview", "candidate_id": "cand-01", "judge_id": "judge-03", "criteria_version": "cv-interview-1", "score": 87, "scored_at": "2026-05-16"},
+    {"id": "sc-01-i-j4", "stage_id": "interview", "candidate_id": "cand-01", "judge_id": "judge-04", "criteria_version": "cv-interview-1", "score": 91, "scored_at": "2026-05-16"},
+    {"id": "sc-02-i-j1", "stage_id": "interview", "candidate_id": "cand-02", "judge_id": "judge-01", "criteria_version": "cv-interview-1", "score": 85, "scored_at": "2026-05-16"},
+    {"id": "sc-02-i-j3", "stage_id": "interview", "candidate_id": "cand-02", "judge_id": "judge-03", "criteria_version": "cv-interview-1", "score": 84, "scored_at": "2026-05-16"},
+    {"id": "sc-02-i-j4", "stage_id": "interview", "candidate_id": "cand-02", "judge_id": "judge-04", "criteria_version": "cv-interview-1", "score": 70, "scored_at": "2026-05-16"},
+    {"id": "sc-03-i-j1", "stage_id": "interview", "candidate_id": "cand-03", "judge_id": "judge-01", "criteria_version": "cv-interview-1", "score": 80, "scored_at": "2026-05-16"},
+    {"id": "sc-03-i-j2", "stage_id": "interview", "candidate_id": "cand-03", "judge_id": "judge-02", "criteria_version": "cv-interview-1", "score": 79, "scored_at": "2026-05-16"},
+    {"id": "sc-03-i-j4", "stage_id": "interview", "candidate_id": "cand-03", "judge_id": "judge-04", "criteria_version": "cv-interview-1", "score": 72, "scored_at": "2026-05-16"},
+
+    {"id": "sc-01-f-j2", "stage_id": "final", "candidate_id": "cand-01", "judge_id": "judge-02", "criteria_version": "cv-final-1", "score": 89, "scored_at": "2026-06-06"},
+    {"id": "sc-01-f-j3", "stage_id": "final", "candidate_id": "cand-01", "judge_id": "judge-03", "criteria_version": "cv-final-1", "score": 88, "scored_at": "2026-06-06"},
+    {"id": "sc-01-f-j4", "stage_id": "final", "candidate_id": "cand-01", "judge_id": "judge-04", "criteria_version": "cv-final-1", "score": 92, "scored_at": "2026-06-06"},
+    {"id": "sc-02-f-j1", "stage_id": "final", "candidate_id": "cand-02", "judge_id": "judge-01", "criteria_version": "cv-final-1", "score": 86, "scored_at": "2026-06-06"},
+    {"id": "sc-02-f-j3", "stage_id": "final", "candidate_id": "cand-02", "judge_id": "judge-03", "criteria_version": "cv-final-1", "score": 85, "scored_at": "2026-06-06"},
+    {"id": "sc-02-f-j4", "stage_id": "final", "candidate_id": "cand-02", "judge_id": "judge-04", "criteria_version": "cv-final-1", "score": 82, "scored_at": "2026-06-06"},
+    {"id": "sc-03-f-j1", "stage_id": "final", "candidate_id": "cand-03", "judge_id": "judge-01", "criteria_version": "cv-final-1", "score": 78, "scored_at": "2026-06-06"},
+    {"id": "sc-03-f-j2", "stage_id": "final", "candidate_id": "cand-03", "judge_id": "judge-02", "criteria_version": "cv-final-1", "score": 80, "scored_at": "2026-06-06"},
+    {"id": "sc-03-f-j4", "stage_id": "final", "candidate_id": "cand-03", "judge_id": "judge-04", "criteria_version": "cv-final-1", "score": 75, "scored_at": "2026-06-06"}
+  ],
+  "score_reviews": [
+    {
+      "id": "rev-03-screen-1",
+      "candidate_id": "cand-03",
+      "stage_id": "screen",
+      "score_id": "sc-03-s-j4",
+      "trigger": "extreme_gap",
+      "threshold": 20,
+      "gap_to_median": 23,
+      "created_at": "2026-04-11",
+      "outcome": "retained",
+      "elimination": false,
+      "resolution": "评委丁确认仅依据确认版材料对领导才能维度作保守判断，评分属自由心证范围；分数保留，候选人继续进入面谈，极端分差不构成淘汰。"
+    }
+  ],
+  "appeals": [
+    {
+      "id": "appeal-01",
+      "candidate_id": "cand-02",
+      "stage_id": "interview",
+      "filed_at": "2026-05-21",
+      "status": "closed_no_change",
+      "closed_at": "2026-05-27",
+      "claim": "质疑面谈评分所依据的材料视图与授权范围",
+      "freeze": {
+        "frozen_at": "2026-05-21",
+        "criteria_version": "cv-interview-1",
+        "material_versions": [
+          "m-nom-02-v1",
+          "m-tra-02-v1",
+          "m-tra-02-v2",
+          "m-pro-02-v1",
+          "m-svc-02-v1",
+          "m-rec-02-v1",
+          "m-pub-02-v1"
+        ],
+        "judge_ids": ["judge-01", "judge-03", "judge-04"],
+        "score_ids": ["sc-02-i-j1", "sc-02-i-j3", "sc-02-i-j4"]
+      },
+      "resolution": "冻结快照核验：面谈视图仅含授权字段，监护人信息未展示；评分标准与面板均为冻结版本，维持原评分。"
+    }
+  ],
+  "aggregated_results": [
+    {"candidate_id": "cand-01", "stage_weights": {"screen": 0.3, "interview": 0.3, "final": 0.4}, "panel_means": {"screen": 86.67, "interview": 88.67, "final": 89.67}, "weighted_total": 88.47},
+    {"candidate_id": "cand-02", "stage_weights": {"screen": 0.3, "interview": 0.3, "final": 0.4}, "panel_means": {"screen": 80.33, "interview": 79.67, "final": 84.33}, "weighted_total": 81.73},
+    {"candidate_id": "cand-03", "stage_weights": {"screen": 0.3, "interview": 0.3, "final": 0.4}, "panel_means": {"screen": 78.33, "interview": 77.0, "final": 77.67}, "weighted_total": 77.67}
+  ],
+  "results": [
+    {
+      "rank": 1,
+      "candidate_id": "cand-01",
+      "award": "杰出学生奖",
+      "announced_at": "2026-06-20",
+      "public_detail_level": "full",
+      "rationale": {
+        "internal_refs": ["m-nom-01-v2", "m-tra-01-v1", "m-pro-01-v1", "m-svc-01-v1", "m-rec-01-v2", "m-pub-01-v1"],
+        "published_refs": ["m-nom-01-v2", "m-tra-01-v1", "m-pro-01-v1", "m-svc-01-v1", "m-rec-01-v2", "m-pub-01-v1"]
+      }
+    },
+    {
+      "rank": 2,
+      "candidate_id": "cand-02",
+      "award": "杰出学生优异奖",
+      "announced_at": "2026-06-20",
+      "public_detail_level": "award_only",
+      "rationale": {
+        "internal_refs": ["m-nom-02-v1", "m-tra-02-v2", "m-pro-02-v1", "m-svc-02-v1", "m-rec-02-v1"],
+        "published_refs": []
+      },
+      "publication_note": "未成年人仅按授权发布奖项与化名，不公开院校、成绩与服务细节"
+    }
+  ],
+  "reconstructions": [
+    {
+      "rank": 1,
+      "candidate_id": "cand-01",
+      "bundle_id": "recon-2026-rank1",
+      "evidence_versions": ["m-nom-01-v1", "m-nom-01-v2", "m-tra-01-v1", "m-pro-01-v1", "m-svc-01-v1", "m-rec-01-v1", "m-rec-01-v2", "m-pub-01-v1"],
+      "criteria_versions": {"screen": "cv-screen-1", "interview": "cv-interview-1", "final": "cv-final-1"},
+      "eligible_judges": {"screen": ["judge-02", "judge-03", "judge-04"], "interview": ["judge-02", "judge-03", "judge-04"], "final": ["judge-02", "judge-03", "judge-04"]},
+      "score_ids": ["sc-01-s-j2", "sc-01-s-j3", "sc-01-s-j4", "sc-01-i-j2", "sc-01-i-j3", "sc-01-i-j4", "sc-01-f-j2", "sc-01-f-j3", "sc-01-f-j4"],
+      "appeal_freeze_ids": []
+    },
+    {
+      "rank": 2,
+      "candidate_id": "cand-02",
+      "bundle_id": "recon-2026-rank2",
+      "evidence_versions": ["m-nom-02-v1", "m-tra-02-v1", "m-tra-02-v2", "m-pro-02-v1", "m-svc-02-v1", "m-rec-02-v1", "m-pub-02-v1"],
+      "criteria_versions": {"screen": "cv-screen-1", "interview": "cv-interview-1", "final": "cv-final-1"},
+      "eligible_judges": {"screen": ["judge-01", "judge-03", "judge-04"], "interview": ["judge-01", "judge-03", "judge-04"], "final": ["judge-01", "judge-03", "judge-04"]},
+      "score_ids": ["sc-02-s-j1", "sc-02-s-j3", "sc-02-s-j4", "sc-02-i-j1", "sc-02-i-j3", "sc-02-i-j4", "sc-02-f-j1", "sc-02-f-j3", "sc-02-f-j4"],
+      "appeal_freeze_ids": ["appeal-01"]
+    }
+  ],
+  "retention": {
+    "winners": {
+      "policy": "public_record_retained_per_consent",
+      "raw_evidence_purge_after": "2031-06-20",
+      "note": "奖项公布信息按授权保留；原始材料五年后到期清理，未成年人授权可随时书面撤回"
+    },
+    "unsuccessful": [
+      {
+        "candidate_id": "cand-03",
+        "retain_until": "2026-12-20",
+        "purge_after": "2026-12-20",
+        "disposition": "delete_identifying_data_keep_anonymized_statistics",
+        "material_ids": ["m-nom-03-v1", "m-tra-03-v1", "m-pro-03-v1", "m-pro-03-v2", "m-svc-03-v1", "m-svc-03-v2", "m-rec-03-v1", "m-pub-03-v1"],
+        "score_ids": ["sc-03-s-j1", "sc-03-s-j2", "sc-03-s-j4", "sc-03-i-j1", "sc-03-i-j2", "sc-03-i-j4", "sc-03-f-j1", "sc-03-f-j2", "sc-03-f-j4"],
+        "note": "公布后 183 天删除可识别资料；极端分差复核结论去标识后保留至审计期限届满"
+      }
+    ]
+  }
 }
